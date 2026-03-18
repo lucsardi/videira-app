@@ -1,3 +1,0 @@
-repo
-Personal access tokens (classic)
-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
