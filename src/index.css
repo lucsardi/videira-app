@@ -1,0 +1,91 @@
+@import "tailwindcss";
+
+@theme {
+  --color-pastel-green: #E2F0CB;
+  --color-soft-green: #4CAF50;
+  --color-deep-green: #2E7D32;
+  --color-mint-green: #F1F8E9;
+  --color-pastel-blue: #B8E2F2;
+  --color-pastel-pink: #F9D5E5;
+  --color-pastel-yellow: #FFF5BA;
+  --color-pastel-cream: #FDFCF0;
+  --color-soft-dark: #333333;
+  --color-soft-gray: #757575;
+  --color-brand-primary: #008080; /* Teal/Green from image */
+  --color-brand-secondary: #006666;
+}
+
+body {
+  background-color: #f8f9fa;
+  color: var(--color-soft-dark);
+  font-family: 'Inter', sans-serif;
+}
+
+.card-pastel {
+  background: white;
+  border-radius: 1rem;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.btn-pastel {
+  padding: 0.6rem 1.2rem;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn-pastel:hover {
+  filter: brightness(0.95);
+}
+
+.header-fixed {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background-color: var(--color-brand-primary);
+  color: white;
+}
+
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  border-top: 1px solid #eee;
+  display: flex;
+  justify-content: space-around;
+  padding: 0.75rem;
+  z-index: 50;
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.7rem;
+  color: var(--color-soft-gray);
+}
+
+.nav-item.active {
+  color: var(--color-brand-primary);
+}
+
+.search-bar {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem 0.5rem 2.5rem;
+  width: 100%;
+  color: white;
+}
+
+.search-bar::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+}
