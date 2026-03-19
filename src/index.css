@@ -89,3 +89,7 @@ body {
 .search-bar::placeholder {
   color: rgba(255, 255, 255, 0.7);
 }
+
+.logo {
+  filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+}

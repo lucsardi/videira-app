@@ -2,7 +2,7 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  */
-
+import logo from './assets/logo_vid.png';
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Calendar, 
@@ -110,9 +110,9 @@ const LoginScreen = ({ onLogin }: { onLogin: (role: 'admin' | 'user') => void })
         className="mb-12"
       >
         <img 
-          src="https://raw.githubusercontent.com/lucas85sardinha/assets/main/videirapp-logo.png" 
+          src={logo} 
           alt="Comunidade Videira Logo" 
-          className="w-64 h-auto mx-auto"
+          className="w-64 h-auto mx-auto logo"
           referrerPolicy="no-referrer"
         />
       </motion.div>
