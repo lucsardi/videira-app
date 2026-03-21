@@ -2,7 +2,7 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  */
-import logo from './assets/logo_vid.png';
+import logo from './assets/logo_vidapp.png';
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Calendar, 
@@ -24,6 +24,9 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { getDoc, doc } from 'firebase/firestore';
+import { auth, db } from '../firebase';
 
 // --- Types ---
 
@@ -101,6 +104,77 @@ const INITIAL_MEMBERS: Member[] = [
 const LoginScreen = ({ onLogin }: { onLogin: (role: 'admin' | 'user') => void }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleLogin = async () => {
+    setError('');
+    
+    const emailTrimmed = email.trim();
+    const passwordTrimmed = password.trim();
+    
+    if (!emailTrimmed || !passwordTrimmed) {
+      setError("Por favor, preencha os dois campos.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      console.log("=== Iniciando Login Firebase ===");
+      console.log("Email enviado:", emailTrimmed);
+      console.log("Comprimento da senha:", passwordTrimmed.length);
+      console.log("Projeto Firebase:", import.meta.env.VITE_FIREBASE_PROJECT_ID);
+      console.log("Auth configurado:", !!auth);
+      
+      const userCredential = await signInWithEmailAndPassword(auth, emailTrimmed, passwordTrimmed);
+      const user = userCredential.user;
+      
+      console.log("✅ Login bem-sucedido!");
+      console.log("UID:", user.uid);
+      console.log("Email verificado:", user.emailVerified);
+
+      // Buscar role no Firestore
+      try {
+        const userDoc = await getDoc(doc(db, "members", user.uid));
+        if (userDoc.exists()) {
+          const role = userDoc.data()?.role;
+          console.log("Role encontrado:", role);
+          
+          if (role === "admin") {
+            onLogin("admin");
+          } else {
+            onLogin("user");
+          }
+        } else {
+          console.warn("Documento do usuário não encontrado no Firestore. Fazendo login como user.");
+          onLogin("user");
+        }
+      } catch (firestoreError) {
+        console.warn("Erro ao buscar role no Firestore:", firestoreError);
+        onLogin("user");
+      }
+    } catch (err: any) {
+      console.error("❌ Erro do Firebase:", err.code, err.message);
+      console.error("Detalhes completos:", err);
+      
+      // Mapeamento de erros mais específico
+      const errorMap: Record<string, string> = {
+        'auth/user-not-found': 'Usuário não encontrado. Crie uma conta no Firebase Console > Authentication > Create user',
+        'auth/wrong-password': 'Senha incorreta',
+        'auth/invalid-email': 'Email inválido. Use o formato: email@exemplo.com',
+        'auth/invalid-credential': 'Credencial inválida. Verifique email e senha. Se tiver espaços, remova-os.',
+        'auth/user-disabled': 'Usuário foi desabilitado no Firebase',
+        'auth/too-many-requests': 'Muitas tentativas de login. Tente novamente depois de alguns minutos.',
+        'auth/network-request-failed': 'Erro de conexão com Firebase. Verifique sua internet e configuração.',
+      };
+      
+      const mensagemErro = errorMap[err.code] || `Erro: ${err.message}`;
+      setError(mensagemErro);
+      
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-white p-4">
@@ -122,8 +196,7 @@ const LoginScreen = ({ onLogin }: { onLogin: (role: 'admin' | 'user') => void })
         animate={{ opacity: 1, y: 0 }}
         className="card-pastel w-full max-w-md p-8"
       >
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-soft-dark">Comunidade Videira</h1>
+        <div className="text-center mb-8">        
           <p className="text-soft-gray">Gerencie os laços da nossa igreja</p>
         </div>
 
@@ -136,6 +209,7 @@ const LoginScreen = ({ onLogin }: { onLogin: (role: 'admin' | 'user') => void })
               onChange={(e) => setEmail(e.target.value)}
               className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-primary"
               placeholder="admin@igreja.com"
+              disabled={loading}
             />
           </div>
           <div>
@@ -146,14 +220,24 @@ const LoginScreen = ({ onLogin }: { onLogin: (role: 'admin' | 'user') => void })
               onChange={(e) => setPassword(e.target.value)}
               className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-primary"
               placeholder="••••••••"
+              disabled={loading}
             />
           </div>
+
+          {error && (
+            <div className="bg-red-100 border border-red-300 text-red-700 px-4 py-2 rounded-lg text-sm">
+              {error}
+            </div>
+          )}
+
           <button 
-            onClick={() => onLogin('admin')}
-            className="w-full btn-pastel bg-brand-primary text-white mt-4"
+            onClick={handleLogin}
+            disabled={loading}
+            className="w-full bg-brand-primary text-white px-4 py-2 rounded-lg font-medium hover:bg-opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            Entrar
+            {loading ? 'Entrando...' : 'Entrar'}
           </button>
+
           <div className="text-center mt-4">
             <button className="text-sm text-brand-primary font-medium hover:underline">
               Esqueci minha senha
@@ -355,7 +439,7 @@ const BottomNavbar = ({ activeTab, onTabChange }: { activeTab: string, onTabChan
         className={`nav-item ${activeTab === 'dashboard' ? 'active' : ''}`}
       >
         <Calendar size={24} />
-        <span>Dashboard</span>
+        <span>Início</span>
       </button>
       <button 
         onClick={() => onTabChange('members')}
