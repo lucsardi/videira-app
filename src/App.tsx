@@ -21,10 +21,14 @@ import {
   CheckCircle2,
   Clock,
   Sparkles,
-  ChevronRight
+  ChevronRight,
+  Power,
+  Phone,
+  MapPin,
+  ArrowLeft
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import { getDoc, doc } from 'firebase/firestore';
 import { auth, db } from '../firebase';
 
@@ -44,6 +48,9 @@ interface Member {
   phone?: string;
   photo?: string;
   jobTitle?: string;
+  instagram?: string;
+  whatsapp?: string;
+  location?: string;
 }
 
 // --- Mock Data ---
@@ -101,7 +108,7 @@ const INITIAL_MEMBERS: Member[] = [
 
 // --- Components ---
 
-const LoginScreen = ({ onLogin }: { onLogin: (role: 'admin' | 'user') => void }) => {
+const LoginScreen = ({ onLogin }: { onLogin: (role: 'admin' | 'user', member: Member | null) => void }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -137,21 +144,51 @@ const LoginScreen = ({ onLogin }: { onLogin: (role: 'admin' | 'user') => void })
       try {
         const userDoc = await getDoc(doc(db, "members", user.uid));
         if (userDoc.exists()) {
-          const role = userDoc.data()?.role;
+          const data = userDoc.data();
+          const role = data?.role;
           console.log("Role encontrado:", role);
-          
+
+          const loggedMember: Member = {
+            id: user.uid,
+            name: data?.name || user.email || 'Usuário',
+            connection: data?.connection || 'Não definida',
+            connectionType: data?.connectionType || 'Visitante',
+            reminder: data?.reminder ?? false,
+            email: data?.email || user.email || '',
+            phone: data?.phone || '',
+            photo: data?.photo || '',
+            jobTitle: data?.jobTitle || '',
+            instagram: data?.instagram || '',
+            whatsapp: data?.whatsapp || '',
+            location: data?.location || ''
+          };
+
           if (role === "admin") {
-            onLogin("admin");
+            onLogin("admin", loggedMember);
           } else {
-            onLogin("user");
+            onLogin("user", loggedMember);
           }
         } else {
           console.warn("Documento do usuário não encontrado no Firestore. Fazendo login como user.");
-          onLogin("user");
+          onLogin("user", {
+            id: user.uid,
+            name: user.email || 'Usuário',
+            connection: 'Não definida',
+            connectionType: 'Visitante',
+            reminder: false,
+            email: user.email || '',
+          });
         }
       } catch (firestoreError) {
         console.warn("Erro ao buscar role no Firestore:", firestoreError);
-        onLogin("user");
+        onLogin("user", {
+          id: user.uid,
+          name: user.email || 'Usuário',
+          connection: 'Não definida',
+          connectionType: 'Visitante',
+          reminder: false,
+          email: user.email || '',
+        });
       }
     } catch (err: any) {
       console.error("❌ Erro do Firebase:", err.code, err.message);
@@ -321,6 +358,117 @@ const Dashboard = ({ members, onNavigate }: { members: Member[], onNavigate: (ta
   );
 };
 
+const ProfileScreen = ({ member, onBack, onPhotoChange }: { member: Member | null; onBack: () => void; onPhotoChange: (url: string) => void }) => {
+  if (!member) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-8">
+        <p className="text-gray-500">Nenhum usuário logado.</p>
+      </div>
+    );
+  }
+
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        onPhotoChange(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const getWhatsappUrl = () => {
+    const phone = (member.whatsapp || member.phone || '').replace(/\D/g, '');
+    if (!phone) return '#';
+    const formatted = phone.startsWith('55') ? phone : `55${phone}`;
+    return `https://wa.me/${formatted}`;
+  };
+
+  const getInstagramUrl = () => {
+    if (member.instagram) {
+      const handle = member.instagram.replace(/^@/, '');
+      return `https://instagram.com/${handle}`;
+    }
+    return '#';
+  };
+
+  const getLocationUrl = () => {
+    if (member.location) {
+      return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(member.location)}`;
+    }
+    return 'https://www.google.com/maps';
+  };
+
+  return (
+    <div className="min-h-screen bg-white pb-20">
+      <div className="bg-brand-primary p-4 pt-12 text-white flex items-center gap-3">
+        <button onClick={onBack} className="p-2 hover:opacity-80 transition">
+          <ArrowLeft size={24} />
+        </button>
+        <h1 className="text-lg font-bold">Perfil</h1>
+      </div>
+
+      <div className="p-6 flex flex-col items-center gap-4">
+        <div className="relative w-36 h-36">
+          <div className="w-full h-full rounded-full overflow-hidden border-4 border-brand-primary">
+            {member.photo ? (
+              <img src={member.photo} alt={member.name} className="w-full h-full object-cover" />
+            ) : (
+              <div className="w-full h-full bg-gray-100 flex items-center justify-center text-3xl text-gray-400">{member.name[0]?.toUpperCase() || '?'}</div>
+            )}
+          </div>
+          <button 
+            onClick={() => document.getElementById('photo-input')?.click()}
+            className="absolute -bottom-1 -right-1 bg-brand-primary text-white p-3 rounded-full hover:bg-brand-dark transition shadow-lg z-10"
+          >
+            <Plus size={16} />
+          </button>
+          <input 
+            id="photo-input"
+            type="file" 
+            accept="image/*" 
+            onChange={handlePhotoUpload} 
+            className="hidden"
+          />
+        </div>
+
+        <h2 className="text-2xl font-bold text-center">{member.name}</h2>
+
+        <div className="flex gap-3">
+          <a href={getWhatsappUrl()} target="_blank" rel="noreferrer" className="px-4 py-2 border border-brand-primary text-brand-primary rounded-full hover:bg-brand-primary hover:text-white transition inline-flex items-center gap-2">
+            <Phone size={16} />
+            WhatsApp
+          </a>
+          <a href={getInstagramUrl()} target="_blank" rel="noreferrer" className="px-4 py-2 border border-brand-primary text-brand-primary rounded-full hover:bg-brand-primary hover:text-white transition inline-flex items-center gap-2">
+            <Instagram size={16} />
+            Instagram
+          </a>
+        </div>
+
+        <div className="w-full mt-4 p-4 rounded-xl border border-gray-200 text-center">
+          <p className="text-xs font-bold text-emerald-600 uppercase tracking-widest mb-1">Conexão</p>
+          <h3 className="text-xl font-bold text-gray-900">{member.connection}</h3>
+          <div className="mt-3 flex justify-center">
+            <a href={getLocationUrl()} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-primary text-white hover:bg-brand-dark transition">
+              <MapPin size={16} />
+              Localização
+            </a>
+          </div>
+        </div>
+
+        <div className="w-full mt-4 p-4 rounded-xl border border-gray-200">
+          <h3 className="font-bold mb-2">Mais Informações</h3>
+          <div className="space-y-2">
+            <p><span className="font-semibold">Email:</span> {member.email || 'Não informado'}</p>
+            <p><span className="font-semibold">Telefone:</span> {member.phone || 'Não informado'}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const MemberDetail = ({ member, onBack, onUpdate }: { member: Member, onBack: () => void, onUpdate: (m: Member) => void }) => {
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -408,14 +556,24 @@ const MemberDetail = ({ member, onBack, onUpdate }: { member: Member, onBack: ()
   );
 };
 
-const Header = ({ onSearch, searchTerm, onAdd }: { onSearch: (val: string) => void, searchTerm: string, onAdd: () => void }) => {
+const Header = ({ onSearch, searchTerm, onAdd, onLogout }: { onSearch: (val: string) => void, searchTerm: string, onAdd: () => void, onLogout: () => void }) => {
   return (
     <header className="header-fixed p-4 pt-12">
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-xl font-bold">Comunidade Videira</h1>
-        <button onClick={onAdd} className="p-2 bg-white/20 rounded-full hover:bg-white/30 transition-colors">
-          <Plus size={24} />
-        </button>
+        <div className="flex items-center gap-3">
+          <button onClick={onAdd} className="p-2 bg-white/20 rounded-full hover:bg-white/30 transition-colors">
+            <Plus size={24} />
+          </button>
+          <button onClick={() => {
+            if (window.confirm('Tem certeza que deseja sair?')) {
+              onLogout();
+            }
+          }} className="px-3 py-2 bg-brand-primary text-white rounded-full hover:bg-brand-dark transition-colors text-sm font-semibold inline-flex items-center gap-1">
+            <Power size={14} />
+            sair
+          </button>
+        </div>
       </div>
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/70" size={18} />
@@ -456,7 +614,7 @@ const BottomNavbar = ({ activeTab, onTabChange }: { activeTab: string, onTabChan
         <span>IA</span>
       </button>
       <button 
-        onClick={() => onTabChange('members')}
+        onClick={() => onTabChange('profile')}
         className={`nav-item ${activeTab === 'profile' ? 'active' : ''}`}
       >
         <User size={24} />
@@ -692,10 +850,24 @@ const AISimulator = ({ member }: { member: Member | null }) => {
 
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userRole, setUserRole] = useState<'admin' | 'user' | null>(null);
+  const [loggedMember, setLoggedMember] = useState<Member | null>(null);
   const [members, setMembers] = useState<Member[]>(INITIAL_MEMBERS);
   const [selectedMember, setSelectedMember] = useState<Member | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'members' | 'ai' | 'add'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'members' | 'ai' | 'add' | 'profile'>('dashboard');
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      setIsLoggedIn(false);
+      setUserRole(null);
+      setLoggedMember(null);
+      setActiveTab('dashboard');
+    } catch (err) {
+      console.error('Erro durante logout:', err);
+    }
+  };
 
   const filteredMembers = useMemo(() => {
     return members.filter(m => 
@@ -710,7 +882,29 @@ export default function App() {
   };
 
   if (!isLoggedIn) {
-    return <LoginScreen onLogin={() => setIsLoggedIn(true)} />;
+    return (
+      <LoginScreen onLogin={(role, member) => {
+        setIsLoggedIn(true);
+        setUserRole(role);
+        setLoggedMember(member);
+        setActiveTab('dashboard');
+      }} />
+    );
+  }
+
+  if (activeTab === 'profile') {
+    return (
+      <ProfileScreen
+        member={loggedMember}
+        onBack={() => setActiveTab('dashboard')}
+        onPhotoChange={(newPhoto) => {
+          if (!loggedMember) return;
+          const updated = { ...loggedMember, photo: newPhoto };
+          setLoggedMember(updated);
+          setMembers((prev) => prev.map((m) => (m.id === updated.id ? updated : m)));
+        }}
+      />
+    );
   }
 
   if (selectedMember && activeTab === 'members') {
@@ -729,6 +923,7 @@ export default function App() {
         searchTerm={searchTerm} 
         onSearch={setSearchTerm} 
         onAdd={() => setActiveTab('add')} 
+        onLogout={handleLogout}
       />
 
       <main className="max-w-4xl mx-auto">
