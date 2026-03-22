@@ -2,6 +2,7 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  */
+import AdminDashboard from "./assets/components/AdminDashboard";
 import logo from './assets/logo_vidapp.png';
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
@@ -146,6 +147,7 @@ const LoginScreen = ({ onLogin }: { onLogin: (role: 'admin' | 'user', member: Me
         if (userDoc.exists()) {
           const data = userDoc.data();
           const role = data?.role;
+          console.log("Documento encontrado no Firestore:", data);
           console.log("Role encontrado:", role);
 
           const loggedMember: Member = {
@@ -295,12 +297,29 @@ const Dashboard = ({ members, onNavigate }: { members: Member[], onNavigate: (ta
     }).length;
   }, [members]);
 
+  const weddingAnniversaryCount = useMemo(() => {
+    return members.filter(m => m.weddingAnniversary).length;
+  }, [members]);
+
   const reminderCount = members.filter(m => m.reminder).length;
 
   return (
     <div className="p-4 space-y-6">
       <h2 className="text-lg font-bold text-soft-dark">Menu Principal</h2>
       <div className="grid grid-cols-2 gap-4">
+        <button 
+          onClick={() => onNavigate('members')}
+          className="card-pastel p-6 flex flex-col items-center justify-center gap-3 hover:bg-mint-green transition-colors"
+        >
+          <div className="w-12 h-12 bg-brand-primary/10 rounded-full flex items-center justify-center text-brand-primary">
+            <Users size={24} />
+          </div>
+          <div className="text-center">
+            <p className="font-bold text-sm">Painel de Pessoas</p>
+            <p className="text-xs text-soft-gray">{members.length} cadastrados</p>
+          </div>
+        </button>
+
         <button 
           onClick={() => onNavigate('dashboard')}
           className="card-pastel p-6 flex flex-col items-center justify-center gap-3 hover:bg-mint-green transition-colors"
@@ -318,25 +337,28 @@ const Dashboard = ({ members, onNavigate }: { members: Member[], onNavigate: (ta
           onClick={() => onNavigate('dashboard')}
           className="card-pastel p-6 flex flex-col items-center justify-center gap-3 hover:bg-mint-green transition-colors"
         >
+          <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#4A90E2" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="9" cy="10" r="5" />
+              <circle cx="15" cy="14" r="5" />
+            </svg>
+          </div>
+          <div className="text-center">
+            <p className="font-bold text-sm">Aniversários de Casamento</p>
+            <p className="text-xs text-soft-gray">{weddingAnniversaryCount} cadastrado</p>
+          </div>
+        </button>
+
+        <button 
+          onClick={() => onNavigate('dashboard')}
+          className="card-pastel p-6 flex flex-col items-center justify-center gap-3 hover:bg-mint-green transition-colors"
+        >
           <div className="w-12 h-12 bg-pastel-yellow/20 rounded-full flex items-center justify-center text-pastel-yellow">
             <Bell size={24} />
           </div>
           <div className="text-center">
             <p className="font-bold text-sm">Lembretes ou Alarme</p>
             <p className="text-xs text-soft-gray">{reminderCount} ativos</p>
-          </div>
-        </button>
-
-        <button 
-          onClick={() => onNavigate('members')}
-          className="card-pastel p-6 flex flex-col items-center justify-center gap-3 hover:bg-mint-green transition-colors col-span-2"
-        >
-          <div className="w-12 h-12 bg-brand-primary/10 rounded-full flex items-center justify-center text-brand-primary">
-            <Users size={24} />
-          </div>
-          <div className="text-center">
-            <p className="font-bold text-sm">Painel de Pessoas</p>
-            <p className="text-xs text-soft-gray">{members.length} cadastrados</p>
           </div>
         </button>
       </div>
@@ -358,7 +380,8 @@ const Dashboard = ({ members, onNavigate }: { members: Member[], onNavigate: (ta
   );
 };
 
-const ProfileScreen = ({ member, onBack, onPhotoChange }: { member: Member | null; onBack: () => void; onPhotoChange: (url: string) => void }) => {
+const ProfileScreen = ({ member, onBack, onPhotoChange, userRole }: { member: Member | null; onBack: () => void; onPhotoChange: (url: string) => void; userRole: 'admin' | 'user' | null }) => {
+  console.log('ProfileScreen renderizado - userRole:', userRole, 'member:', member);
   if (!member) {
     return (
       <div className="min-h-screen flex items-center justify-center p-8">
@@ -464,6 +487,13 @@ const ProfileScreen = ({ member, onBack, onPhotoChange }: { member: Member | nul
             <p><span className="font-semibold">Telefone:</span> {member.phone || 'Não informado'}</p>
           </div>
         </div>
+
+        {userRole === 'admin' && (
+          <div className="w-full mt-6">
+            {console.log('userRole no ProfileScreen:', userRole)}
+            <AdminDashboard />
+          </div>
+        )}
       </div>
     </div>
   );
@@ -884,6 +914,7 @@ export default function App() {
   if (!isLoggedIn) {
     return (
       <LoginScreen onLogin={(role, member) => {
+        console.log('Login realizado - role:', role, 'member:', member);
         setIsLoggedIn(true);
         setUserRole(role);
         setLoggedMember(member);
@@ -896,6 +927,7 @@ export default function App() {
     return (
       <ProfileScreen
         member={loggedMember}
+        userRole={userRole}
         onBack={() => setActiveTab('dashboard')}
         onPhotoChange={(newPhoto) => {
           if (!loggedMember) return;
