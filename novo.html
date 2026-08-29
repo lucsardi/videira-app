@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Novo Aniversariante — Videira App</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@1,700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="css/theme.css" rel="stylesheet">
+  <link href="css/style.css" rel="stylesheet">
+</head>
+<body>
+  <div id="app-sidebar"></div>
+  <header id="app-topbar"></header>
+
+  <main class="vd-container" style="max-width: 560px;">
+    <h1 class="h4 fw-bold mb-3" id="tituloPagina">Adicionar aniversariante</h1>
+
+    <div id="msgErro" class="alert alert-danger d-none"></div>
+    <div id="msgSucesso" class="alert alert-success d-none">Cadastrado com sucesso! ✅</div>
+
+    <form id="formPessoa">
+      <div class="d-flex align-items-center gap-3 mb-4">
+        <div class="position-relative">
+          <div id="previewFoto" class="vd-avatar vd-avatar-lg" style="border: 2px dashed var(--vd-border); cursor: pointer;">📷</div>
+          <input type="file" id="inputFoto" accept="image/*" class="d-none">
+        </div>
+        <div>
+          <button type="button" class="btn btn-sm btn-outline-primary" id="btnEscolherFoto">Adicionar foto</button>
+          <button type="button" class="btn btn-sm btn-link text-danger d-none" id="btnRemoverFoto">Remover foto</button>
+          <p class="text-muted small mb-0 mt-1">Opcional. Use uma foto nítida para facilitar o reconhecimento.</p>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Nome completo *</label>
+        <input type="text" class="form-control" id="nome" required placeholder="Digite o nome completo">
+      </div>
+
+      <div class="row g-2 mb-3">
+        <div class="col-6">
+          <label class="form-label">Dia *</label>
+          <input type="number" min="1" max="31" class="form-control" id="dia" required>
+        </div>
+        <div class="col-6">
+          <label class="form-label">Mês *</label>
+          <select class="form-select" id="mes" required>
+            <option value="">Selecione</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Conexão *</label>
+        <select class="form-select" id="conexao" required>
+          <option value="">Selecione a conexão</option>
+        </select>
+        <p class="text-muted small mb-0 mt-1 d-none" id="avisoConexaoFixa">
+          Seu acesso é restrito a esta conexão.
+        </p>
+      </div>
+
+      <div class="form-check mb-2">
+        <input class="form-check-input" type="checkbox" id="ehLider">
+        <label class="form-check-label" for="ehLider">É líder de conexão ou pastor</label>
+      </div>
+
+      <div class="form-check mb-3">
+        <input class="form-check-input" type="checkbox" id="temCasamento">
+        <label class="form-check-label" for="temCasamento">Registrar aniversário de casamento</label>
+      </div>
+
+      <div id="blocoCasamento" class="bg-light rounded p-3 mb-3 d-none">
+        <div class="row g-2 mb-2">
+          <div class="col-6">
+            <label class="form-label">Dia do casamento</label>
+            <input type="number" min="1" max="31" class="form-control" id="diaCasamento">
+          </div>
+          <div class="col-6">
+            <label class="form-label">Mês do casamento</label>
+            <select class="form-select" id="mesCasamento">
+              <option value="">Selecione</option>
+            </select>
+          </div>
+        </div>
+        <label class="form-label">Nome do cônjuge</label>
+        <input type="text" class="form-control" id="conjuge" placeholder="Ex: João Souza">
+      </div>
+
+      <div class="d-flex gap-2">
+        <a href="membros.html" class="btn btn-outline-secondary flex-fill">Cancelar</a>
+        <button type="submit" class="btn btn-primary flex-fill" id="btnSalvar">Salvar aniversariante</button>
+      </div>
+    </form>
+  </main>
+
+  <div id="app-bottomnav"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/nav.js"></script>
+  <script src="js/novo.js"></script>
+</body>
+</html>

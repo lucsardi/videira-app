@@ -1,0 +1,26 @@
+-- Cole isso no SQL Editor do Supabase ANTES de importar o CSV
+insert into connections (name) values
+  ('Atos 29'),
+  ('Betel'),
+  ('Caminho'),
+  ('Canaã'),
+  ('Charisma'),
+  ('Dunamis'),
+  ('Débora'),
+  ('Emaús'),
+  ('Emunah'),
+  ('Ester'),
+  ('Ezequiel 37'),
+  ('Gênesis'),
+  ('Hebrom'),
+  ('Itália'),
+  ('Kairós'),
+  ('Líderes'),
+  ('Missionário'),
+  ('N. Paraíso'),
+  ('Os do caminho'),
+  ('Peniel'),
+  ('Reobote'),
+  ('São Paulo'),
+  ('nova')
+on conflict (name) do nothing;

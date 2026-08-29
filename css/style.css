@@ -1,0 +1,149 @@
+/* Layout geral, além do que já vem do theme.css */
+
+html, body {
+  overflow-x: hidden; /* trava qualquer rolagem horizontal indesejada */
+  max-width: 100%;
+}
+
+body {
+  padding-top: 60px; /* topbar mobile */
+}
+
+@media (min-width: 768px) {
+  body {
+    padding-top: 0;
+    padding-left: 240px; /* largura da sidebar */
+  }
+}
+
+.vd-container {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 20px 16px 90px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@media (min-width: 768px) {
+  .vd-container {
+    padding-bottom: 32px;
+    max-width: 900px;
+  }
+}
+
+/* Correção de flexbox: por padrão um item flex não encolhe/quebra texto,
+   ele empurra o conteúdo pra fora da tela. Isso conserta os cards de
+   pessoa, indicadores etc. em telas pequenas. */
+.card-pessoa,
+.vd-indicador,
+.card {
+  min-width: 0;
+}
+.card-pessoa .d-flex,
+.vd-indicador .d-flex {
+  min-width: 0;
+}
+.card-pessoa .fw-semibold,
+.card-pessoa .small,
+.vd-indicador .rotulo {
+  overflow-wrap: break-word;
+  word-break: break-word;
+  min-width: 0;
+}
+
+/* ---- Sidebar (desktop) ---- */
+.vd-sidebar {
+  display: none;
+}
+@media (min-width: 768px) {
+  .vd-sidebar {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 240px;
+    background: var(--vd-surface);
+    border-right: 1px solid var(--vd-border);
+    padding: 20px 12px;
+    z-index: 100;
+  }
+}
+.vd-sidebar .vd-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  color: var(--vd-text-secondary);
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-decoration: none;
+  margin-bottom: 2px;
+}
+.vd-sidebar .vd-nav-link:hover {
+  background: var(--vd-green-50);
+}
+.vd-sidebar .vd-nav-link.active {
+  background: var(--vd-green-100);
+  color: var(--vd-green-700);
+  font-weight: 700;
+}
+
+/* ---- Topbar (mobile) ---- */
+.vd-topbar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 60px;
+  background: var(--vd-surface);
+  border-bottom: 1px solid var(--vd-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  z-index: 110;
+}
+@media (min-width: 768px) {
+  .vd-topbar { display: none; }
+}
+
+/* ---- Barra inferior (mobile) ---- */
+.vd-bottomnav {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: var(--vd-surface);
+  border-top: 1px solid var(--vd-border);
+  display: flex;
+  z-index: 110;
+}
+@media (min-width: 768px) {
+  .vd-bottomnav { display: none; }
+}
+.vd-bottomnav a, .vd-bottomnav button {
+  flex: 1;
+  border: none;
+  background: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 0 10px;
+  font-size: 0.65rem;
+  color: var(--vd-text-secondary);
+  text-decoration: none;
+}
+.vd-bottomnav a.active, .vd-bottomnav button.active {
+  color: var(--vd-green-600);
+  font-weight: 700;
+}
+.vd-bottomnav .icone {
+  font-size: 1.2rem;
+}
+
+@media (max-width: 576px) {
+  .vd-container {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+}

@@ -1,0 +1,201 @@
+/* ============================================================
+   VIDEIRA APP — DESIGN SYSTEM
+   Tokens extraídos da proposta de design (paleta, tipografia, forma)
+   ============================================================ */
+
+:root {
+  /* ---- Verde Videira ---- */
+  --vd-green-50:  #F1F8F3;
+  --vd-green-100: #DDEFE2;
+  --vd-green-200: #BDE0C7;
+  --vd-green-300: #8FC8A1;
+  --vd-green-400: #63AD7B;
+  --vd-green-500: #439965;
+  --vd-green-600: #347C51;
+  --vd-green-700: #28633F;
+
+  /* ---- Berry / Uva (celebração) ---- */
+  --vd-berry-50:  #FFF3F4;
+  --vd-berry-100: #FCE1E5;
+  --vd-berry-200: #F5BEC5;
+  --vd-berry-300: #E9909B;
+  --vd-berry-400: #D46674;
+  --vd-berry-500: #BC5261;
+  --vd-berry-600: #9F3E4D;
+
+  /* ---- Neutros ---- */
+  --vd-graphite: #2F2E30;
+  --vd-text-secondary: #737A75;
+  --vd-background: #F8FAF8;
+  --vd-surface: #FFFFFF;
+  --vd-border: #E6EBE8;
+
+  /* ---- Forma ---- */
+  --vd-radius-input: 12px;
+  --vd-radius-button: 12px;
+  --vd-radius-card: 20px;
+  --vd-radius-card-special: 24px;
+
+  /* ---- Sobrescreve variáveis do Bootstrap 5.3 ---- */
+  --bs-primary: var(--vd-green-500);
+  --bs-primary-rgb: 67, 153, 101;
+  --bs-body-bg: var(--vd-background);
+  --bs-body-color: var(--vd-graphite);
+  --bs-border-radius: var(--vd-radius-input);
+  --bs-border-radius-sm: 8px;
+  --bs-border-radius-lg: var(--vd-radius-card);
+  --bs-font-sans-serif: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --bs-link-color: var(--vd-green-600);
+  --bs-link-hover-color: var(--vd-green-700);
+}
+
+body {
+  font-family: var(--bs-font-sans-serif);
+  color: var(--vd-graphite);
+}
+
+/* ---- Botões ---- */
+.btn {
+  border-radius: var(--vd-radius-button);
+  font-weight: 600;
+}
+.btn-primary {
+  background-color: var(--vd-green-500);
+  border-color: var(--vd-green-500);
+}
+.btn-primary:hover, .btn-primary:focus, .btn-primary:active {
+  background-color: var(--vd-green-600) !important;
+  border-color: var(--vd-green-600) !important;
+}
+.btn-outline-primary {
+  color: var(--vd-green-600);
+  border-color: var(--vd-green-300);
+}
+.btn-outline-primary:hover {
+  background-color: var(--vd-green-500);
+  border-color: var(--vd-green-500);
+}
+.btn-celebration {
+  background-color: var(--vd-berry-100);
+  color: var(--vd-berry-600);
+  border: 1px solid var(--vd-berry-200);
+  border-radius: var(--vd-radius-button);
+  font-weight: 600;
+}
+.btn-celebration:hover {
+  background-color: var(--vd-berry-200);
+  color: var(--vd-berry-600);
+}
+
+/* ---- Inputs / Selects ---- */
+.form-control, .form-select {
+  border-radius: var(--vd-radius-input);
+  border-color: var(--vd-border);
+}
+.form-control:focus, .form-select:focus {
+  border-color: var(--vd-green-400);
+  box-shadow: 0 0 0 0.2rem rgba(67, 153, 101, 0.15);
+}
+
+/* ---- Cards ---- */
+.card, .vd-card {
+  background-color: var(--vd-surface);
+  border: 1px solid var(--vd-border);
+  border-radius: var(--vd-radius-card);
+  box-shadow: 0 1px 3px rgba(47, 46, 48, 0.04);
+}
+.card-pessoa {
+  border: 1px solid var(--vd-border);
+  border-radius: var(--vd-radius-card);
+}
+
+/* ---- Badges de data ---- */
+.badge-hoje {
+  background-color: var(--vd-berry-100);
+  color: var(--vd-berry-600);
+  font-weight: 600;
+}
+.badge-amanha {
+  background-color: var(--vd-green-100);
+  color: var(--vd-green-700);
+  font-weight: 600;
+}
+.badge-em-dias {
+  background-color: var(--vd-background);
+  color: var(--vd-text-secondary);
+  border: 1px solid var(--vd-border);
+  font-weight: 600;
+}
+.badge-lider {
+  background-color: #FFF7E6;
+  color: #8A5A00;
+  font-size: 0.65rem;
+}
+
+/* ---- Avatares ---- */
+.vd-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  background-color: var(--vd-green-100);
+  color: var(--vd-green-700);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.vd-avatar-lg {
+  width: 88px;
+  height: 88px;
+  font-size: 1.5rem;
+}
+
+/* ---- Logo / marca ---- */
+.vd-logo {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-style: italic;
+  font-weight: 700;
+  color: var(--vd-green-600);
+  font-size: 1.6rem;
+  line-height: 1;
+}
+.vd-logo-sub {
+  font-family: var(--bs-font-sans-serif);
+  font-style: normal;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  font-size: 0.6rem;
+  color: var(--vd-graphite);
+  display: block;
+  text-align: center;
+}
+.vd-tagline {
+  color: var(--vd-text-secondary);
+  font-size: 0.9rem;
+}
+
+/* ---- Indicadores do dashboard ---- */
+.vd-indicador {
+  border-radius: var(--vd-radius-card);
+  padding: 16px;
+  border: 1px solid var(--vd-border);
+  background: var(--vd-surface);
+}
+.vd-indicador .valor {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1;
+}
+.vd-indicador .rotulo {
+  color: var(--vd-text-secondary);
+  font-size: 0.8rem;
+}
+.vd-indicador.destaque {
+  background-color: var(--vd-berry-50);
+  border-color: var(--vd-berry-100);
+}
+.vd-indicador.destaque .valor {
+  color: var(--vd-berry-600);
+}
