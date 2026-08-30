@@ -39,10 +39,11 @@ alter table people add column if not exists photo_url text;
 
 -- ---------- Tabela: profiles (perfil/papel de cada usuário) ----------
 -- Papéis (roles):
---   admin          -> acesso total, vê a igreja inteira
---   leader_view    -> só visualiza, restrito à própria conexão
---   leader_editor  -> visualiza, adiciona e edita, restrito à própria conexão
---   leader_manager -> visualiza, adiciona, edita e exclui, restrito à própria conexão
+--   admin          -> acesso total, vê a igreja inteira, gerencia tudo
+--   viewer_all     -> "Membro — Visualização Total": vê a igreja inteira, mas não adiciona/edita/exclui
+--   leader_view    -> "Membro — Visualização": só visualiza, restrito à própria conexão
+--   leader_editor  -> "Líder — Editor": visualiza, adiciona e edita, restrito à própria conexão
+--   leader_manager -> "Líder — Gestor": visualiza, adiciona, edita e exclui, restrito à própria conexão
 create table if not exists profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   full_name text,
@@ -64,7 +65,7 @@ end $$;
 
 alter table profiles drop constraint if exists profiles_role_check;
 alter table profiles add constraint profiles_role_check
-  check (role in ('admin', 'leader_view', 'leader_editor', 'leader_manager'));
+  check (role in ('admin', 'viewer_all', 'leader_view', 'leader_editor', 'leader_manager'));
 
 -- ---------- Tabela: invites (convites para novos usuários) ----------
 -- Importante: em Authentication > URL Configuration no painel do Supabase,
@@ -75,7 +76,7 @@ create table if not exists invites (
   id uuid primary key default gen_random_uuid(),
   token uuid not null default gen_random_uuid() unique,
   email text not null,
-  role text not null check (role in ('admin', 'leader_view', 'leader_editor', 'leader_manager')),
+  role text not null check (role in ('admin', 'viewer_all', 'leader_view', 'leader_editor', 'leader_manager')),
   connection_id uuid references connections(id) on delete set null,
   created_by uuid references auth.users(id) on delete set null,
   used boolean not null default false,
@@ -162,6 +163,16 @@ as $$
   );
 $$;
 
+create or replace function public.can_view_all()
+returns boolean
+language sql security definer set search_path = public stable
+as $$
+  select exists (
+    select 1 from public.profiles
+    where id = auth.uid() and role in ('admin', 'viewer_all')
+  );
+$$;
+
 create or replace function public.my_connection()
 returns uuid
 language sql security definer set search_path = public stable
@@ -186,11 +197,12 @@ drop policy if exists "connections_admin_all" on connections;
 create policy "connections_admin_all" on connections
   for all using (public.is_admin()) with check (public.is_admin());
 
--- people: visão restrita à própria conexão para líderes; admin vê tudo (igreja inteira)
+-- people: visão restrita à própria conexão por padrão; admin e "Visualização Total"
+-- veem a igreja inteira (mas só admin/editor/gestor podem alterar algo — ver policies abaixo)
 drop policy if exists "people_select" on people;
 create policy "people_select" on people
   for select using (
-    public.is_admin() or connection_id = public.my_connection()
+    public.can_view_all() or connection_id = public.my_connection()
   );
 
 drop policy if exists "people_insert" on people;

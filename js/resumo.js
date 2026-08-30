@@ -22,7 +22,7 @@ async function iniciarResumo(menu, conexoesTodas) {
 
   RESUMO_PESSOAS = pessoas || [];
 
-  if (menu?.ehAdmin) {
+  if (menu?.veTudo) {
     renderizarCardsAdmin(conexoesTodas);
 
     const selectFiltro = document.getElementById("filtroConexaoGrafico");

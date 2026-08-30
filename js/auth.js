@@ -48,6 +48,11 @@ function podeExcluir(perfil) {
   return ["admin", "leader_manager"].includes(perfil?.role);
 }
 
+// Admin e "Visualização Total" veem a igreja inteira; os demais são restritos à própria conexão
+function veTudo(perfil) {
+  return ["admin", "viewer_all"].includes(perfil?.role);
+}
+
 // Só admin vê a igreja inteira; os demais são restritos à própria conexão
 function conexaoEscopo(perfil) {
   return ehAdmin(perfil) ? null : perfil?.connection_id || null;
@@ -55,7 +60,8 @@ function conexaoEscopo(perfil) {
 
 const ROTULOS_PAPEL = {
   admin: "Administrador",
-  leader_view: "Líder — Visualização",
+  viewer_all: "Membro — Visualização Total",
+  leader_view: "Membro — Visualização",
   leader_editor: "Líder — Editor",
   leader_manager: "Líder — Gestor",
 };

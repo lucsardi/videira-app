@@ -11,7 +11,7 @@ let CONEXOES_TODAS = [];
 
   const menu = await montarLayout("relatorios.html");
 
-  if (menu?.ehAdmin) {
+  if (menu?.veTudo) {
     const { data: conexoes } = await sb.from("connections").select("*").order("name");
     CONEXOES_TODAS = conexoes || [];
     const selectConexao = document.getElementById("filtroConexao");

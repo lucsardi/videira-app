@@ -109,5 +109,12 @@ async function montarLayout(paginaAtual) {
   document.getElementById("app-topbar").innerHTML = topbarHtml;
   document.getElementById("app-bottomnav").innerHTML = bottomnavHtml;
 
-  return { user, perfil, ehAdmin: admin, podeEditar: editar, podeExcluir: podeExcluir(perfil) };
+  return {
+    user,
+    perfil,
+    ehAdmin: admin,
+    podeEditar: editar,
+    podeExcluir: podeExcluir(perfil),
+    veTudo: veTudo(perfil),
+  };
 }

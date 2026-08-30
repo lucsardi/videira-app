@@ -180,7 +180,8 @@ async function carregarUsuarios() {
           <label class="form-label small mb-1">Papel</label>
           <select class="form-select form-select-sm" data-papel-id="${p.id}">
             <option value="admin" ${p.role === "admin" ? "selected" : ""}>Administrador</option>
-            <option value="leader_view" ${p.role === "leader_view" ? "selected" : ""}>Líder — Visualização</option>
+            <option value="viewer_all" ${p.role === "viewer_all" ? "selected" : ""}>Membro — Visualização Total</option>
+            <option value="leader_view" ${p.role === "leader_view" ? "selected" : ""}>Membro — Visualização</option>
             <option value="leader_editor" ${p.role === "leader_editor" ? "selected" : ""}>Líder — Editor</option>
             <option value="leader_manager" ${p.role === "leader_manager" ? "selected" : ""}>Líder — Gestor</option>
           </select>

@@ -116,8 +116,8 @@
     `).join("");
   }
 
-  // ---------- Conexões em destaque (só para admin, que vê a igreja inteira) ----------
-  if (menu?.ehAdmin) {
+  // ---------- Conexões em destaque (para quem vê a igreja inteira: admin ou Visualização Total) ----------
+  if (menu?.veTudo) {
     renderizarConexoesDestaque(lista);
   }
 })();

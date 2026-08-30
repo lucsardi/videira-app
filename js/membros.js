@@ -5,7 +5,7 @@
 let TODAS_PESSOAS = [];
 let PODE_EDITAR = false;
 let PODE_EXCLUIR = false;
-let EH_ADMIN = false;
+let VE_TUDO = false;
 let PERIODO_ATUAL = "";
 
 (async () => {
@@ -15,12 +15,13 @@ let PERIODO_ATUAL = "";
   const menu = await montarLayout("membros.html");
   PODE_EDITAR = menu?.podeEditar || false;
   PODE_EXCLUIR = menu?.podeExcluir || false;
-  EH_ADMIN = menu?.ehAdmin || false;
+  VE_TUDO = menu?.veTudo || false;
 
   if (PODE_EDITAR) document.getElementById("btnNovo").classList.remove("d-none");
 
-  // Filtro de conexão só faz sentido para admin (líderes já são restritos à própria conexão pelo banco)
-  if (EH_ADMIN) {
+  // Filtro de conexão só faz sentido pra quem vê a igreja inteira
+  // (os demais já são restritos à própria conexão pelo banco)
+  if (VE_TUDO) {
     const { data: conexoes } = await sb.from("connections").select("*").order("name");
     const selectConexao = document.getElementById("filtroConexao");
     (conexoes || []).forEach((c) => {

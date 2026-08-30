@@ -22,11 +22,12 @@ build. Banco de dados e fotos: Supabase (gratuito). Hospedagem: Vercel ou GitHub
 └── js/*.js                → lógica de cada página
 ```
 
-## Os 4 níveis de permissão
+## Os 5 níveis de permissão
 | Papel | Vê | Adiciona | Edita | Exclui | Gerencia conexões/usuários |
 |---|---|---|---|---|---|
 | **Administrador** | Igreja inteira | ✅ | ✅ | ✅ | ✅ |
-| **Líder — Visualização** | Só a própria conexão | — | — | — | — |
+| **Membro — Visualização Total** | Igreja inteira | — | — | — | — |
+| **Membro — Visualização** | Só a própria conexão | — | — | — | — |
 | **Líder — Editor** | Só a própria conexão | ✅ | ✅ | — | — |
 | **Líder — Gestor** | Só a própria conexão | ✅ | ✅ | ✅ | — |
 
