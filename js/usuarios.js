@@ -7,6 +7,14 @@
 let CONEXOES_CACHE = [];
 let CURRENT_USER_ID = null;
 
+// Monta o link do convite de forma robusta, funcione a URL com ou sem ".html"
+// (ex: Vercel com cleanUrls deixa a página como "/usuarios" em vez de "/usuarios.html")
+function linkConvite(token) {
+  const path = window.location.pathname;
+  const pasta = path.substring(0, path.lastIndexOf("/") + 1); // ex: "/" ou "/videira-app/"
+  return `${window.location.origin}${pasta}convite.html?token=${token}`;
+}
+
 (async () => {
   const sessao = await exigirLogin();
   if (!sessao) return;
@@ -64,7 +72,7 @@ async function gerarConvite(e) {
     return;
   }
 
-  const link = `${window.location.origin}${window.location.pathname.replace("usuarios.html", "convite.html")}?token=${data.token}`;
+  const link = linkConvite(data.token);
   document.getElementById("linkConviteTexto").value = link;
   document.getElementById("linkGerado").classList.remove("d-none");
   document.getElementById("formConvite").reset();
@@ -113,7 +121,7 @@ async function carregarConvitesPendentes() {
 
   container.querySelectorAll("[data-copiar-token]").forEach((btn) => {
     btn.addEventListener("click", () => {
-      const link = `${window.location.origin}${window.location.pathname.replace("usuarios.html", "convite.html")}?token=${btn.dataset.copiarToken}`;
+      const link = linkConvite(btn.dataset.copiarToken);
       navigator.clipboard?.writeText(link);
       mostrarToast("Link copiado!");
     });
