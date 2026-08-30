@@ -48,6 +48,7 @@ async function montarLayout(paginaAtual) {
           ${escapeHtml(user.email)}<br>
           <span class="fw-semibold">${rotuloPapel(perfil?.role)}</span>
         </div>
+        <a href="perfil.html" class="btn btn-outline-secondary btn-sm w-100 mb-2 ${paginaAtual === "perfil.html" ? "active" : ""}">👤 Meu perfil</a>
         <button class="btn btn-outline-secondary btn-sm w-100" onclick="sair()">Sair</button>
       </div>
     </aside>
@@ -72,6 +73,7 @@ async function montarLayout(paginaAtual) {
     ...(editar ? [{ href: "novo.html", label: "Novo cadastro", icone: "➕" }] : []),
     { href: "relatorios.html", label: "Relatórios", icone: "📄" },
     ...(admin ? [{ href: "usuarios.html", label: "Usuários", icone: "👥" }] : []),
+    { href: "perfil.html", label: "Meu perfil", icone: "👤" },
   ];
 
   const bottomnavHtml = `

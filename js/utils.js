@@ -35,6 +35,15 @@ function escapeHtml(texto) {
   return div.innerHTML;
 }
 
+// Monta um link absoluto para outra página deste site, robusto a URLs "limpas"
+// (sem .html) como as que a Vercel gera. Ex: linkAbsoluto("convite.html", {token: "abc"})
+function linkAbsoluto(arquivo, params = {}) {
+  const caminho = window.location.pathname;
+  const pasta = caminho.substring(0, caminho.lastIndexOf("/") + 1);
+  const query = new URLSearchParams(params).toString();
+  return `${window.location.origin}${pasta}${arquivo}${query ? "?" + query : ""}`;
+}
+
 // Monta um avatar circular: foto se tiver, senão a inicial do nome
 function avatarHtml(p, classeExtra = "") {
   if (p.photo_url) {
