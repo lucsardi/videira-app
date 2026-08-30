@@ -39,15 +39,28 @@ async function carregarConexoes() {
     return;
   }
 
-  container.innerHTML = conexoes.map((c) => `
+  // Busca a contagem de pessoas por conexão (uma query só, agrupada no navegador)
+  const { data: pessoas } = await sb.from("people").select("connection_id");
+  const contagens = {};
+  (pessoas || []).forEach((p) => {
+    if (p.connection_id) contagens[p.connection_id] = (contagens[p.connection_id] || 0) + 1;
+  });
+
+  container.innerHTML = conexoes.map((c) => {
+    const total = contagens[c.id] || 0;
+    return `
     <div class="card card-pessoa p-3 mb-2 d-flex flex-row justify-content-between align-items-center">
-      <span>${escapeHtml(c.name)}</span>
-      <div class="d-flex gap-3">
+      <a href="conexao-detalhe.html?id=${c.id}" class="text-decoration-none flex-grow-1" style="color: inherit; min-width: 0;">
+        <div class="fw-semibold">${escapeHtml(c.name)}</div>
+        <div class="small text-muted">${total} pessoa${total !== 1 ? "s" : ""} cadastrada${total !== 1 ? "s" : ""}</div>
+      </a>
+      <div class="d-flex gap-3 flex-shrink-0">
         <button class="btn btn-link btn-sm p-0 small" data-renomear-id="${c.id}" data-renomear-nome="${escapeHtml(c.name)}">Renomear</button>
         <button class="btn btn-link btn-sm p-0 small text-danger" data-excluir-id="${c.id}" data-excluir-nome="${escapeHtml(c.name)}">Excluir</button>
       </div>
     </div>
-  `).join("");
+  `;
+  }).join("");
 }
 
 async function adicionarConexao(e) {
