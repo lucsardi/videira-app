@@ -35,8 +35,7 @@ async function montarLayout(paginaAtual) {
   const sidebarHtml = `
     <aside class="vd-sidebar">
       <div class="mb-4 text-center">
-        <div class="vd-logo">Videira</div>
-        <span class="vd-logo-sub">APP</span>
+        <img src="assets/images/logo_videira_app.png" alt="Videira App" style="max-width: 150px; width: 100%; height: auto;">
       </div>
       <nav class="flex-grow-1">
         ${todosItens.map((l) => `
@@ -57,7 +56,7 @@ async function montarLayout(paginaAtual) {
   // ---------- Topbar (mobile) ----------
   const topbarHtml = `
     <header class="vd-topbar">
-      <div class="vd-logo" style="font-size: 1.1rem;">Videira <span style="font-family: var(--bs-font-sans-serif); font-style: normal; font-weight:700; font-size:0.55rem; letter-spacing:0.1em;">APP</span></div>
+      <img src="assets/images/logo_videira_app.png" alt="Videira App" style="height: 26px; width: auto;">
       <button class="btn btn-sm btn-outline-secondary" onclick="sair()">Sair</button>
     </header>
   `;

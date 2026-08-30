@@ -102,6 +102,14 @@ Acesse `http://localhost:8000/login.html`
 
 ---
 
+## URLs sem .html (Vercel)
+O arquivo `vercel.json` na raiz do projeto já configura isso — a Vercel esconde a extensão
+`.html` da barra de endereço automaticamente (ex: `/membros.html` passa a aparecer como
+`/membros`). Não precisa mudar nenhum link dentro do código, é só ter esse arquivo no
+projeto antes do deploy.
+
+---
+
 ## Passo 3 — Subir para o GitHub
 ```bash
 git init
