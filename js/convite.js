@@ -86,7 +86,9 @@ const tokenConvite = new URLSearchParams(window.location.search).get("token");
         Conta criada! 🎉 Enviamos um e-mail de confirmação para <strong>${escapeHtml(convite.email)}</strong>.
         Abra o e-mail, confirme, e depois faça login normalmente.
       </div>
-      <a href="login.html" class="btn btn-outline-primary w-100">Ir para o login</a>
+      <div id="blocoInstalarApp"></div>
+      <a href="login.html" class="btn btn-outline-primary w-100 mt-3">Ir para o login</a>
     `;
+    renderizarBlocoInstalarApp("blocoInstalarApp");
   });
 })();
