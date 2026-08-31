@@ -7,6 +7,8 @@ let PODE_EDITAR = false;
 let PODE_EXCLUIR = false;
 let VE_TUDO = false;
 let PERIODO_ATUAL = "";
+let ORDENAR_POR = "nome";
+let DIRECAO_ORDEM = "asc";
 
 (async () => {
   const sessao = await exigirLogin();
@@ -72,6 +74,20 @@ let PERIODO_ATUAL = "";
     renderizarLista();
   });
 
+  // Ordenação: por nome ou por data de aniversário, crescente/decrescente
+  document.getElementById("ordenarPor").addEventListener("change", (e) => {
+    ORDENAR_POR = e.target.value;
+    renderizarLista();
+  });
+
+  document.getElementById("btnDirecaoOrdem").addEventListener("click", () => {
+    const btn = document.getElementById("btnDirecaoOrdem");
+    DIRECAO_ORDEM = DIRECAO_ORDEM === "asc" ? "desc" : "asc";
+    btn.dataset.direcao = DIRECAO_ORDEM;
+    btn.textContent = DIRECAO_ORDEM === "asc" ? "⬆️ Crescente" : "⬇️ Decrescente";
+    renderizarLista();
+  });
+
   // Delegação de eventos para os botões "Excluir" (que mudam a cada renderização)
   document.getElementById("listaMembros").addEventListener("click", (e) => {
     const btn = e.target.closest("[data-excluir-id]");
@@ -99,6 +115,17 @@ function renderizarLista() {
     }
 
     return true;
+  });
+
+  // Ordenação
+  filtrada.sort((a, b) => {
+    let comparacao;
+    if (ORDENAR_POR === "aniversario") {
+      comparacao = (a.birth_month * 100 + a.birth_day) - (b.birth_month * 100 + b.birth_day);
+    } else {
+      comparacao = a.full_name.localeCompare(b.full_name, "pt-BR");
+    }
+    return DIRECAO_ORDEM === "asc" ? comparacao : -comparacao;
   });
 
   document.getElementById("contagem").textContent =
