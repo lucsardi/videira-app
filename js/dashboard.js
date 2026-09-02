@@ -32,7 +32,7 @@
     return;
   }
 
-  const lista = pessoas || [];
+  const lista = aplicarCasamentosVinculados(pessoas || []);
   const mesAtual = new Date().getMonth() + 1;
 
   const hoje = lista.filter((p) => ehHoje(p.birth_day, p.birth_month));
@@ -92,7 +92,7 @@
     .filter((p) => !ehHoje(p.birth_day, p.birth_month))
     .map((p) => ({ pessoa: p, dias: diasAte(p.birth_day, p.birth_month) }))
     .sort((a, b) => a.dias - b.dias)
-    .slice(0, 10);
+    .slice(0, 5);
 
   const containerProximos = document.getElementById("listaProximos");
   if (proximos.length === 0) {
@@ -106,6 +106,35 @@
             <div class="fw-semibold">${escapeHtml(pessoa.full_name)}</div>
             <div class="small text-muted">
               ${pessoa.birth_day} de ${nomeDoMes(pessoa.birth_month)} · ${escapeHtml(pessoa.connections?.name || "Sem conexão")}
+            </div>
+          </div>
+        </div>
+        <span class="badge ${dias === 1 ? "badge-amanha" : "badge-em-dias"}">
+          ${dias === 1 ? "Amanhã" : `em ${dias} dias`}
+        </span>
+      </div>
+    `).join("");
+  }
+
+  // ---------- Próximos aniversários de casamento ----------
+  const proximosCasamentos = lista
+    .filter((p) => p.wedding_day && p.wedding_month && !ehHoje(p.wedding_day, p.wedding_month))
+    .map((p) => ({ pessoa: p, dias: diasAte(p.wedding_day, p.wedding_month) }))
+    .sort((a, b) => a.dias - b.dias)
+    .slice(0, 5);
+
+  const containerProximosCasamentos = document.getElementById("listaProximosCasamentos");
+  if (proximosCasamentos.length === 0) {
+    containerProximosCasamentos.innerHTML = `<div class="text-muted small">Nenhum aniversário de casamento cadastrado.</div>`;
+  } else {
+    containerProximosCasamentos.innerHTML = proximosCasamentos.map(({ pessoa, dias }) => `
+      <div class="card card-pessoa p-3 mb-2 d-flex flex-row justify-content-between align-items-center">
+        <div class="d-flex align-items-center gap-2">
+          ${avatarHtml(pessoa)}
+          <div>
+            <div class="fw-semibold">${escapeHtml(pessoa.full_name)}${pessoa.spouse_name ? " & " + escapeHtml(pessoa.spouse_name) : ""}</div>
+            <div class="small text-muted">
+              💍 ${pessoa.wedding_day} de ${nomeDoMes(pessoa.wedding_month)} · ${escapeHtml(pessoa.connections?.name || "Sem conexão")}
             </div>
           </div>
         </div>

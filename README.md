@@ -84,6 +84,12 @@ vê mais nada, mesmo que tente logar). O login dela continua existindo no Supaba
 apagá-lo de vez (por exemplo, para reusar aquele e-mail em outra conta), isso ainda precisa
 ser feito uma vez em Authentication → Users → (⋮) → Delete user.
 
+### Perfil e recuperação de senha
+Qualquer usuário logado pode trocar o próprio nome e senha na tela **Meu perfil**. Se
+esquecer a senha, o link "Esqueceu sua senha?" na tela de login manda um e-mail automático
+do Supabase (grátis) com um link para criar uma nova. Isso depende do **Site URL** estar
+configurado corretamente (veja acima).
+
 ---
 
 ## Passo 2 — Testar localmente

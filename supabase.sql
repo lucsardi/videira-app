@@ -28,6 +28,7 @@ create table if not exists people (
   wedding_day int check (wedding_day between 1 and 31),
   wedding_month int check (wedding_month between 1 and 12),
   spouse_name text,
+  spouse_id uuid references people(id) on delete set null,
   photo_url text,
   notes text,
   created_by uuid references auth.users(id) on delete set null,
@@ -36,6 +37,12 @@ create table if not exists people (
 
 -- Caso a tabela já existisse de uma versão anterior sem a coluna de foto:
 alter table people add column if not exists photo_url text;
+
+-- Caso a tabela já existisse sem o vínculo de cônjuge cadastrado no sistema:
+alter table people add column if not exists spouse_id uuid references people(id) on delete set null;
+
+alter table people drop constraint if exists people_spouse_not_self;
+alter table people add constraint people_spouse_not_self check (spouse_id is null or spouse_id <> id);
 
 -- ---------- Tabela: profiles (perfil/papel de cada usuário) ----------
 -- Papéis (roles):
@@ -82,6 +89,13 @@ create table if not exists invites (
   used boolean not null default false,
   created_at timestamptz default now()
 );
+
+-- Se a tabela já existia de antes de "viewer_all" existir, atualiza a regra
+-- (create table if not exists não altera tabelas que já existem, então essa
+-- linha garante que o banco aceite o papel novo mesmo em projetos antigos)
+alter table invites drop constraint if exists invites_role_check;
+alter table invites add constraint invites_role_check
+  check (role in ('admin', 'viewer_all', 'leader_view', 'leader_editor', 'leader_manager'));
 
 -- ---------- Cria profile automaticamente quando um usuário é criado ----------
 -- Se houver um convite pendente (mesmo e-mail, ainda não usado), aplica o papel
@@ -236,6 +250,31 @@ create policy "profiles_select" on profiles
 drop policy if exists "profiles_admin_update" on profiles;
 create policy "profiles_admin_update" on profiles
   for update using (public.is_admin());
+
+-- Cada pessoa pode atualizar o próprio perfil (nome, etc). Um gatilho abaixo
+-- impede que ela mude o próprio papel/conexão por essa via — só admin pode.
+drop policy if exists "profiles_self_update" on profiles;
+create policy "profiles_self_update" on profiles
+  for update using (id = auth.uid()) with check (id = auth.uid());
+
+create or replace function public.protect_profile_privileged_fields()
+returns trigger
+language plpgsql
+security definer set search_path = public
+as $$
+begin
+  if not public.is_admin() then
+    new.role := old.role;
+    new.connection_id := old.connection_id;
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists protect_profile_privileged_fields_trigger on profiles;
+create trigger protect_profile_privileged_fields_trigger
+  before update on profiles
+  for each row execute procedure public.protect_profile_privileged_fields();
 
 -- Admin pode revogar o acesso de alguém removendo o profile dela (o login em si
 -- continua existindo no Supabase Auth, mas a pessoa perde toda permissão no app)

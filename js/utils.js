@@ -53,6 +53,29 @@ function avatarHtml(p, classeExtra = "") {
   return `<div class="vd-avatar ${classeExtra}">${iniciais}</div>`;
 }
 
+// Quando alguém cadastra o aniversário de casamento e vincula o cônjuge a uma
+// pessoa que também está cadastrada no sistema (spouse_id), essa função "empresta"
+// os dados do casamento para o registro do cônjuge também — sem precisar
+// cadastrar a mesma informação duas vezes. Só mexe nos dados em memória
+// (não grava nada no banco), então é seguro chamar sempre que exibir uma lista.
+function aplicarCasamentosVinculados(pessoas) {
+  const porId = new Map(pessoas.map((p) => [p.id, p]));
+
+  pessoas.forEach((p) => {
+    if (p.wedding_day && p.wedding_month && p.spouse_id) {
+      const conjuge = porId.get(p.spouse_id);
+      if (conjuge && !(conjuge.wedding_day && conjuge.wedding_month)) {
+        conjuge.wedding_day = p.wedding_day;
+        conjuge.wedding_month = p.wedding_month;
+        conjuge.spouse_name = conjuge.spouse_name || p.full_name;
+        conjuge.spouse_id = conjuge.spouse_id || p.id;
+      }
+    }
+  });
+
+  return pessoas;
+}
+
 // ============================================
 // Modal de confirmação reutilizável (substitui o confirm() do navegador)
 // Uso: const ok = await confirmarAcao("Título", "Mensagem...", "Excluir", "danger");

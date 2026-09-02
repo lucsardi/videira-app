@@ -29,6 +29,24 @@ const idDetalhe = new URLSearchParams(window.location.search).get("id");
     return;
   }
 
+  // Se essa pessoa não tem casamento cadastrado, verifica se alguém a marcou
+  // como cônjuge (assim não precisa cadastrar a mesma informação duas vezes)
+  if (!(p.wedding_day && p.wedding_month)) {
+    const { data: conjugeQueVinculou } = await sb
+      .from("people")
+      .select("full_name, wedding_day, wedding_month")
+      .eq("spouse_id", p.id)
+      .not("wedding_day", "is", null)
+      .limit(1)
+      .maybeSingle();
+
+    if (conjugeQueVinculou) {
+      p.wedding_day = conjugeQueVinculou.wedding_day;
+      p.wedding_month = conjugeQueVinculou.wedding_month;
+      p.spouse_name = p.spouse_name || conjugeQueVinculou.full_name;
+    }
+  }
+
   const dias = ehHoje(p.birth_day, p.birth_month) ? 0 : diasAte(p.birth_day, p.birth_month);
   const rotuloDias = dias === 0 ? "🎉 Hoje é o dia!" : dias === 1 ? "Aniversário amanhã" : `Faltam ${dias} dias`;
 

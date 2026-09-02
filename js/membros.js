@@ -57,7 +57,7 @@ let DIRECAO_ORDEM = "asc";
     return;
   }
 
-  TODAS_PESSOAS = pessoas || [];
+  TODAS_PESSOAS = aplicarCasamentosVinculados(pessoas || []);
   renderizarLista();
 
   document.getElementById("filtroBusca").addEventListener("input", renderizarLista);

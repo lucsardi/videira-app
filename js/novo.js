@@ -8,6 +8,7 @@ let ARQUIVO_FOTO = null;
 let FOTO_ATUAL_URL = null;
 let REMOVER_FOTO = false;
 let CONEXAO_TRAVADA = null; // se o usuário é líder (não-admin), trava a conexão dele
+let TODAS_PESSOAS_CONJUGE = []; // lista pra popular o select de cônjuge vinculado
 
 (async () => {
   const sessao = await exigirLogin();
@@ -63,6 +64,27 @@ let CONEXAO_TRAVADA = null; // se o usuário é líder (não-admin), trava a con
       selectConexao.appendChild(opt);
     });
   }
+
+  // Popula o select de "cônjuge já cadastrado aqui" (RLS já limita ao que essa pessoa pode ver)
+  const { data: pessoasParaConjuge } = await sb
+    .from("people")
+    .select("id, full_name")
+    .order("full_name");
+  TODAS_PESSOAS_CONJUGE = (pessoasParaConjuge || []).filter((p) => p.id !== idEdicao);
+
+  const selectConjuge = document.getElementById("conjugeVinculado");
+  TODAS_PESSOAS_CONJUGE.forEach((p) => {
+    const opt = document.createElement("option");
+    opt.value = p.id;
+    opt.textContent = p.full_name;
+    selectConjuge.appendChild(opt);
+  });
+  selectConjuge.addEventListener("change", () => {
+    if (selectConjuge.value) {
+      const escolhida = TODAS_PESSOAS_CONJUGE.find((p) => p.id === selectConjuge.value);
+      document.getElementById("conjuge").value = escolhida?.full_name || "";
+    }
+  });
 
   // Upload de foto: clique na área de preview ou no botão abrem o seletor de arquivo
   const inputFoto = document.getElementById("inputFoto");
@@ -126,6 +148,7 @@ let CONEXAO_TRAVADA = null; // se o usuário é líder (não-admin), trava a con
       document.getElementById("diaCasamento").value = pessoa.wedding_day;
       document.getElementById("mesCasamento").value = pessoa.wedding_month;
       document.getElementById("conjuge").value = pessoa.spouse_name || "";
+      if (pessoa.spouse_id) document.getElementById("conjugeVinculado").value = pessoa.spouse_id;
     }
   }
 
@@ -182,6 +205,7 @@ async function salvarPessoa(e) {
     wedding_month: temCasamento && document.getElementById("mesCasamento").value
       ? Number(document.getElementById("mesCasamento").value) : null,
     spouse_name: temCasamento ? (document.getElementById("conjuge").value.trim() || null) : null,
+    spouse_id: temCasamento ? (document.getElementById("conjugeVinculado").value || null) : null,
   };
 
   let resultado;
@@ -225,6 +249,7 @@ async function salvarPessoa(e) {
   document.getElementById("blocoCasamento").classList.add("d-none");
   document.getElementById("previewFoto").innerHTML = "📷";
   document.getElementById("btnRemoverFoto").classList.add("d-none");
+  document.getElementById("conjugeVinculado").value = "";
   ARQUIVO_FOTO = null;
   FOTO_ATUAL_URL = null;
   REMOVER_FOTO = false;
