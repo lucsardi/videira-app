@@ -2,6 +2,8 @@
 // PÁGINA: conexoes.html (somente admin)
 // ============================================
 
+let CONEXOES_CACHE_LISTA = []; // [{ ...conexao, total, nomesLideres }]
+
 (async () => {
   const sessao = await exigirLogin();
   if (!sessao) return;
@@ -15,6 +17,7 @@
   await carregarConexoes();
 
   document.getElementById("formNovaConexao").addEventListener("submit", adicionarConexao);
+  document.getElementById("buscaConexao").addEventListener("input", renderizarLista);
 
   document.getElementById("listaConexoes").addEventListener("click", (e) => {
     const btnRenomear = e.target.closest("[data-renomear-id]");
@@ -34,44 +37,65 @@ async function carregarConexoes() {
     return;
   }
 
-  if (!conexoes || conexoes.length === 0) {
-    container.innerHTML = `<div class="text-muted small">Nenhuma conexão cadastrada.</div>`;
-    return;
-  }
-
-  // Busca a contagem de pessoas por conexão (uma query só, agrupada no navegador)
+  // Contagem de pessoas por conexão
   const { data: pessoas } = await sb.from("people").select("connection_id");
   const contagens = {};
   (pessoas || []).forEach((p) => {
     if (p.connection_id) contagens[p.connection_id] = (contagens[p.connection_id] || 0) + 1;
   });
 
-  // Busca a contagem de líderes por conexão
-  const { data: lideres } = await sb.from("connection_leaders").select("connection_id");
-  const contagensLideres = {};
+  // Nomes dos líderes por conexão
+  const { data: lideres } = await sb
+    .from("connection_leaders")
+    .select("connection_id, people(full_name)");
+  const nomesLideresPorConexao = {};
   (lideres || []).forEach((l) => {
-    contagensLideres[l.connection_id] = (contagensLideres[l.connection_id] || 0) + 1;
+    if (!nomesLideresPorConexao[l.connection_id]) nomesLideresPorConexao[l.connection_id] = [];
+    if (l.people?.full_name) nomesLideresPorConexao[l.connection_id].push(l.people.full_name);
   });
 
-  container.innerHTML = conexoes.map((c) => {
-    const total = contagens[c.id] || 0;
-    const totalLideres = contagensLideres[c.id] || 0;
-    return `
+  CONEXOES_CACHE_LISTA = (conexoes || []).map((c) => ({
+    ...c,
+    total: contagens[c.id] || 0,
+    nomesLideres: nomesLideresPorConexao[c.id] || [],
+  }));
+
+  renderizarLista();
+}
+
+function renderizarLista() {
+  const busca = (document.getElementById("buscaConexao").value || "").trim().toLowerCase();
+  const container = document.getElementById("listaConexoes");
+
+  const filtradas = busca
+    ? CONEXOES_CACHE_LISTA.filter((c) => c.name.toLowerCase().includes(busca))
+    : CONEXOES_CACHE_LISTA;
+
+  if (CONEXOES_CACHE_LISTA.length === 0) {
+    container.innerHTML = `<div class="text-muted small">Nenhuma conexão cadastrada.</div>`;
+    return;
+  }
+
+  if (filtradas.length === 0) {
+    container.innerHTML = `<div class="text-muted small">Nenhuma conexão encontrada para "${escapeHtml(busca)}".</div>`;
+    return;
+  }
+
+  container.innerHTML = filtradas.map((c) => `
     <div class="card card-pessoa p-3 mb-2 d-flex flex-row justify-content-between align-items-center">
       <a href="conexao-detalhe.html?id=${c.id}" class="text-decoration-none flex-grow-1" style="color: inherit; min-width: 0;">
         <div class="fw-semibold">${escapeHtml(c.name)}</div>
-        <div class="small text-muted">
-          ${total} pessoa${total !== 1 ? "s" : ""} cadastrada${total !== 1 ? "s" : ""}
-          ${totalLideres > 0 ? ` · 👤 ${totalLideres} líder${totalLideres !== 1 ? "es" : ""}` : ""}
-        </div>
+        <div class="small text-muted">${c.total} pessoa${c.total !== 1 ? "s" : ""} cadastrada${c.total !== 1 ? "s" : ""}</div>
+        ${c.nomesLideres.length > 0
+          ? `<div class="small text-muted">👤 ${c.nomesLideres.map(escapeHtml).join(", ")}</div>`
+          : `<div class="small text-muted fst-italic">Sem líder definido</div>`}
       </a>
       <div class="d-flex gap-3 flex-shrink-0">
         <button class="btn btn-link btn-sm p-0 small" data-renomear-id="${c.id}" data-renomear-nome="${escapeHtml(c.name)}">Renomear</button>
         <button class="btn btn-link btn-sm p-0 small text-danger" data-excluir-id="${c.id}" data-excluir-nome="${escapeHtml(c.name)}">Excluir</button>
       </div>
     </div>
-  `;
-  }).join("");
+  `).join("");
 }
 
 async function adicionarConexao(e) {

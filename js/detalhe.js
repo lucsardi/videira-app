@@ -47,6 +47,14 @@ const idDetalhe = new URLSearchParams(window.location.search).get("id");
     }
   }
 
+  // Verifica se essa pessoa está registrada como líder de alguma conexão
+  // (tela Conexões → Líderes desta conexão)
+  const { data: liderancas } = await sb
+    .from("connection_leaders")
+    .select("connections(id, name)")
+    .eq("person_id", p.id);
+  const conexoesQueLidera = (liderancas || []).map((l) => l.connections).filter(Boolean);
+
   const dias = ehHoje(p.birth_day, p.birth_month) ? 0 : diasAte(p.birth_day, p.birth_month);
   const rotuloDias = dias === 0 ? "🎉 Hoje é o dia!" : dias === 1 ? "Aniversário amanhã" : `Faltam ${dias} dias`;
 
@@ -55,6 +63,7 @@ const idDetalhe = new URLSearchParams(window.location.search).get("id");
       ${avatarHtml(p, "vd-avatar-lg")}
       <h1 class="h5 fw-bold mt-3 mb-0">${escapeHtml(p.full_name)}</h1>
       ${p.is_leader ? '<span class="badge badge-lider mt-1">Líder/Pastor</span>' : ""}
+      ${conexoesQueLidera.map((c) => `<span class="badge mt-1 ms-1" style="background-color: var(--vd-green-100); color: var(--vd-green-700);">🌿 Líder de ${escapeHtml(c.name)}</span>`).join("")}
     </div>
 
     <div class="card p-3 mb-2">
