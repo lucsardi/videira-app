@@ -46,13 +46,24 @@ async function carregarConexoes() {
     if (p.connection_id) contagens[p.connection_id] = (contagens[p.connection_id] || 0) + 1;
   });
 
+  // Busca a contagem de líderes por conexão
+  const { data: lideres } = await sb.from("connection_leaders").select("connection_id");
+  const contagensLideres = {};
+  (lideres || []).forEach((l) => {
+    contagensLideres[l.connection_id] = (contagensLideres[l.connection_id] || 0) + 1;
+  });
+
   container.innerHTML = conexoes.map((c) => {
     const total = contagens[c.id] || 0;
+    const totalLideres = contagensLideres[c.id] || 0;
     return `
     <div class="card card-pessoa p-3 mb-2 d-flex flex-row justify-content-between align-items-center">
       <a href="conexao-detalhe.html?id=${c.id}" class="text-decoration-none flex-grow-1" style="color: inherit; min-width: 0;">
         <div class="fw-semibold">${escapeHtml(c.name)}</div>
-        <div class="small text-muted">${total} pessoa${total !== 1 ? "s" : ""} cadastrada${total !== 1 ? "s" : ""}</div>
+        <div class="small text-muted">
+          ${total} pessoa${total !== 1 ? "s" : ""} cadastrada${total !== 1 ? "s" : ""}
+          ${totalLideres > 0 ? ` · 👤 ${totalLideres} líder${totalLideres !== 1 ? "es" : ""}` : ""}
+        </div>
       </a>
       <div class="d-flex gap-3 flex-shrink-0">
         <button class="btn btn-link btn-sm p-0 small" data-renomear-id="${c.id}" data-renomear-nome="${escapeHtml(c.name)}">Renomear</button>

@@ -44,6 +44,46 @@ alter table people add column if not exists spouse_id uuid references people(id)
 alter table people drop constraint if exists people_spouse_not_self;
 alter table people add constraint people_spouse_not_self check (spouse_id is null or spouse_id <> id);
 
+-- ---------- Tabela: connection_leaders (líderes de cada conexão) ----------
+-- Cada linha liga UMA pessoa (já cadastrada em "people") a UMA conexão como líder.
+-- Uma conexão pode ter até 4 líderes (checado pelo gatilho abaixo) — podem ser
+-- casais ou pessoas solteiras, não importa, é só uma lista de até 4 pessoas.
+create table if not exists connection_leaders (
+  id uuid primary key default gen_random_uuid(),
+  connection_id uuid not null references connections(id) on delete cascade,
+  person_id uuid not null references people(id) on delete cascade,
+  created_at timestamptz default now(),
+  unique (connection_id, person_id)
+);
+
+create or replace function public.limitar_lideres_por_conexao()
+returns trigger
+language plpgsql
+security definer set search_path = public
+as $$
+begin
+  if (select count(*) from connection_leaders where connection_id = new.connection_id) >= 4 then
+    raise exception 'Uma conexão pode ter no máximo 4 líderes.';
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists limitar_lideres_trigger on connection_leaders;
+create trigger limitar_lideres_trigger
+  before insert on connection_leaders
+  for each row execute procedure public.limitar_lideres_por_conexao();
+
+alter table connection_leaders enable row level security;
+
+drop policy if exists "connection_leaders_select" on connection_leaders;
+create policy "connection_leaders_select" on connection_leaders
+  for select using (auth.role() = 'authenticated');
+
+drop policy if exists "connection_leaders_admin_all" on connection_leaders;
+create policy "connection_leaders_admin_all" on connection_leaders
+  for all using (public.is_admin()) with check (public.is_admin());
+
 -- ---------- Tabela: profiles (perfil/papel de cada usuário) ----------
 -- Papéis (roles):
 --   admin          -> acesso total, vê a igreja inteira, gerencia tudo

@@ -76,15 +76,13 @@
 
   // ---------- Aniversariantes de hoje ----------
   const containerHoje = document.getElementById("listaHoje");
-  if (hoje.length === 0 && casamentosHoje.length === 0) {
+  const casaisHoje = agruparCasais(casamentosHoje, lista);
+  if (hoje.length === 0 && casaisHoje.length === 0) {
     containerHoje.innerHTML = `<div class="card p-3 text-muted small">Ninguém faz aniversário hoje. Que tal ver os próximos? 👇</div>`;
   } else {
     containerHoje.innerHTML =
       hoje.map((p) => cardPessoa(p, "🎂", p.connections?.name)).join("") +
-      casamentosHoje.map((p) => cardPessoa(
-        { ...p, full_name: p.full_name + (p.spouse_name ? ` & ${p.spouse_name}` : "") },
-        "💍", "Aniversário de casamento"
-      )).join("");
+      casaisHoje.map((casal) => cardCasal(casal, "Aniversário de casamento")).join("");
   }
 
   // ---------- Próximos aniversários ----------
@@ -117,32 +115,50 @@
   }
 
   // ---------- Próximos aniversários de casamento ----------
-  const proximosCasamentos = lista
+  const proximosCasamentosBruto = lista
     .filter((p) => p.wedding_day && p.wedding_month && !ehHoje(p.wedding_day, p.wedding_month))
     .map((p) => ({ pessoa: p, dias: diasAte(p.wedding_day, p.wedding_month) }))
-    .sort((a, b) => a.dias - b.dias)
-    .slice(0, 5);
+    .sort((a, b) => a.dias - b.dias);
+
+  // Junta os casais (evita mostrar a mesma união duas vezes) e só então corta em 5
+  const vistosCasal = new Set();
+  const proximosCasamentos = [];
+  for (const item of proximosCasamentosBruto) {
+    if (vistosCasal.has(item.pessoa.id)) continue;
+    if (item.pessoa.spouse_id) vistosCasal.add(item.pessoa.spouse_id);
+    vistosCasal.add(item.pessoa.id);
+    const conjugePessoa = item.pessoa.spouse_id
+      ? lista.find((x) => x.id === item.pessoa.spouse_id)
+      : null;
+    proximosCasamentos.push({ ...item, conjugePessoa });
+    if (proximosCasamentos.length === 5) break;
+  }
 
   const containerProximosCasamentos = document.getElementById("listaProximosCasamentos");
   if (proximosCasamentos.length === 0) {
     containerProximosCasamentos.innerHTML = `<div class="text-muted small">Nenhum aniversário de casamento cadastrado.</div>`;
   } else {
-    containerProximosCasamentos.innerHTML = proximosCasamentos.map(({ pessoa, dias }) => `
-      <div class="card card-pessoa p-3 mb-2 d-flex flex-row justify-content-between align-items-center">
-        <div class="d-flex align-items-center gap-2">
-          ${avatarHtml(pessoa)}
-          <div>
-            <div class="fw-semibold">${escapeHtml(pessoa.full_name)}${pessoa.spouse_name ? " & " + escapeHtml(pessoa.spouse_name) : ""}</div>
-            <div class="small text-muted">
-              💍 ${pessoa.wedding_day} de ${nomeDoMes(pessoa.wedding_month)} · ${escapeHtml(pessoa.connections?.name || "Sem conexão")}
+    containerProximosCasamentos.innerHTML = proximosCasamentos.map(({ pessoa, conjugePessoa, dias }) => {
+      const nomeExibicao = conjugePessoa
+        ? `${pessoa.full_name} & ${conjugePessoa.full_name}`
+        : pessoa.full_name + (pessoa.spouse_name ? ` & ${pessoa.spouse_name}` : "");
+      return `
+        <div class="card card-pessoa p-3 mb-2 d-flex flex-row justify-content-between align-items-center">
+          <div class="d-flex align-items-center gap-2">
+            ${avatarCasalHtml(pessoa, conjugePessoa)}
+            <div>
+              <div class="fw-semibold">${escapeHtml(nomeExibicao)}</div>
+              <div class="small text-muted">
+                💍 ${pessoa.wedding_day} de ${nomeDoMes(pessoa.wedding_month)} · ${escapeHtml(pessoa.connections?.name || "Sem conexão")}
+              </div>
             </div>
           </div>
+          <span class="badge ${dias === 1 ? "badge-amanha" : "badge-em-dias"}">
+            ${dias === 1 ? "Amanhã" : `em ${dias} dias`}
+          </span>
         </div>
-        <span class="badge ${dias === 1 ? "badge-amanha" : "badge-em-dias"}">
-          ${dias === 1 ? "Amanhã" : `em ${dias} dias`}
-        </span>
-      </div>
-    `).join("");
+      `;
+    }).join("");
   }
 
   // ---------- Conexões em destaque (para quem vê a igreja inteira: admin ou Visualização Total) ----------
@@ -197,6 +213,24 @@ function cardPessoa(p, icone, subtitulo) {
         </div>
       </div>
       <span style="font-size: 1.4rem;">${icone}</span>
+    </div>
+  `;
+}
+
+function cardCasal({ pessoa, conjugePessoa }, subtitulo) {
+  const nomeExibicao = conjugePessoa
+    ? `${pessoa.full_name} & ${conjugePessoa.full_name}`
+    : pessoa.full_name + (pessoa.spouse_name ? ` & ${pessoa.spouse_name}` : "");
+  return `
+    <div class="card card-pessoa p-3 mb-2 d-flex flex-row justify-content-between align-items-center">
+      <div class="d-flex align-items-center gap-2">
+        ${avatarCasalHtml(pessoa, conjugePessoa)}
+        <div>
+          <div class="fw-semibold">${escapeHtml(nomeExibicao)}</div>
+          <div class="small text-muted">${escapeHtml(subtitulo || "")}</div>
+        </div>
+      </div>
+      <span style="font-size: 1.4rem;">💍</span>
     </div>
   `;
 }

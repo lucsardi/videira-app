@@ -53,6 +53,41 @@ function avatarHtml(p, classeExtra = "") {
   return `<div class="vd-avatar ${classeExtra}">${iniciais}</div>`;
 }
 
+// Avatar "de casal": duas fotos sobrepostas quando o cônjuge também está
+// cadastrado; se não tiver segunda pessoa, mostra só o avatar normal.
+function avatarCasalHtml(p1, p2) {
+  if (!p2) return avatarHtml(p1);
+  return `
+    <div class="d-flex align-items-center flex-shrink-0" style="width: 58px;">
+      <div style="position: relative; z-index: 2; border-radius: 50%; box-shadow: 0 0 0 2px var(--vd-surface);">
+        ${avatarHtml(p1)}
+      </div>
+      <div style="position: relative; z-index: 1; margin-left: -16px; border-radius: 50%; box-shadow: 0 0 0 2px var(--vd-surface);">
+        ${avatarHtml(p2)}
+      </div>
+    </div>
+  `;
+}
+
+// Junta uma lista já filtrada (ex: "casamentos hoje") em casais, evitando mostrar
+// a mesma união duas vezes quando as duas pessoas estão cadastradas e vinculadas.
+// listaCompleta é usada só pra encontrar os dados do cônjuge (foto, etc).
+function agruparCasais(subconjunto, listaCompleta) {
+  const porId = new Map(listaCompleta.map((p) => [p.id, p]));
+  const vistos = new Set();
+  const casais = [];
+
+  subconjunto.forEach((p) => {
+    if (vistos.has(p.id)) return;
+    const conjugePessoa = p.spouse_id ? porId.get(p.spouse_id) : null;
+    if (conjugePessoa) vistos.add(conjugePessoa.id);
+    vistos.add(p.id);
+    casais.push({ pessoa: p, conjugePessoa: conjugePessoa || null });
+  });
+
+  return casais;
+}
+
 // Quando alguém cadastra o aniversário de casamento e vincula o cônjuge a uma
 // pessoa que também está cadastrada no sistema (spouse_id), essa função "empresta"
 // os dados do casamento para o registro do cônjuge também — sem precisar
