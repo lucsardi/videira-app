@@ -44,6 +44,21 @@ alter table people add column if not exists spouse_id uuid references people(id)
 alter table people drop constraint if exists people_spouse_not_self;
 alter table people add constraint people_spouse_not_self check (spouse_id is null or spouse_id <> id);
 
+-- Tipo de liderança da pessoa (substitui o antigo checkbox simples "é líder/pastor"):
+--   leader        -> Líder de Conexão
+--   leader_pastor -> Líder de Conexão / Pastor
+--   pastor        -> Pastor (sem conexão específica vinculada)
+--   null          -> não é líder nem pastor
+alter table people add column if not exists leader_role text;
+alter table people drop constraint if exists people_leader_role_check;
+alter table people add constraint people_leader_role_check
+  check (leader_role is null or leader_role in ('leader', 'leader_pastor', 'pastor'));
+
+-- Migração de quem já estava marcado no checkbox antigo (is_leader = true):
+-- por padrão vira "Líder de Conexão/Pastor" — é só um chute razoável, ajuste
+-- manualmente quem for só Pastor ou só Líder editando o cadastro da pessoa.
+update people set leader_role = 'leader_pastor' where is_leader = true and leader_role is null;
+
 -- ---------- Tabela: connection_leaders (líderes de cada conexão) ----------
 -- Cada linha liga UMA pessoa (já cadastrada em "people") a UMA conexão como líder.
 -- Uma conexão pode ter até 4 líderes (checado pelo gatilho abaixo) — podem ser

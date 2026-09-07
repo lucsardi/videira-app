@@ -209,7 +209,7 @@ function cardPessoa(p, icone, subtitulo) {
         ${avatarHtml(p)}
         <div>
           <div class="fw-semibold">${escapeHtml(p.full_name)}</div>
-          <div class="small text-muted">${escapeHtml(subtitulo || "")}${p.is_leader ? " · Líder/Pastor" : ""}</div>
+          <div class="small text-muted">${escapeHtml(subtitulo || "")}${p.leader_role ? " · " + rotuloLideranca(p.leader_role) : ""}</div>
         </div>
       </div>
       <span style="font-size: 1.4rem;">${icone}</span>

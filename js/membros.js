@@ -156,7 +156,7 @@ function renderizarLista() {
           <div>
             <div class="fw-semibold">
               ${escapeHtml(p.full_name)}
-              ${p.is_leader ? '<span class="badge badge-lider ms-1">Líder/Pastor</span>' : ""}
+              ${badgeLiderancaHtml(p)}
               ${badge ? " " + badge : ""}
             </div>
             <div class="small text-muted mt-1">🎂 ${p.birth_day} de ${nomeDoMes(p.birth_month)}</div>

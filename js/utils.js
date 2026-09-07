@@ -88,6 +88,22 @@ function agruparCasais(subconjunto, listaCompleta) {
   return casais;
 }
 
+// ---------- Tipo de liderança (leader_role) ----------
+const ROTULOS_LIDERANCA = {
+  leader: "Líder de Conexão",
+  leader_pastor: "Líder de Conexão/Pastor",
+  pastor: "Pastor",
+};
+
+function rotuloLideranca(tipo) {
+  return ROTULOS_LIDERANCA[tipo] || "";
+}
+
+function badgeLiderancaHtml(p, classeExtra = "ms-1") {
+  if (!p.leader_role) return "";
+  return `<span class="badge badge-lider ${classeExtra}">${rotuloLideranca(p.leader_role)}</span>`;
+}
+
 // Quando alguém cadastra o aniversário de casamento e vincula o cônjuge a uma
 // pessoa que também está cadastrada no sistema (spouse_id), essa função "empresta"
 // os dados do casamento para o registro do cônjuge também — sem precisar

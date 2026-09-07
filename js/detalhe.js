@@ -62,7 +62,7 @@ const idDetalhe = new URLSearchParams(window.location.search).get("id");
     <div class="text-center mb-4">
       ${avatarHtml(p, "vd-avatar-lg")}
       <h1 class="h5 fw-bold mt-3 mb-0">${escapeHtml(p.full_name)}</h1>
-      ${p.is_leader ? '<span class="badge badge-lider mt-1">Líder/Pastor</span>' : ""}
+      ${badgeLiderancaHtml(p, "mt-1")}
       ${conexoesQueLidera.map((c) => `<span class="badge mt-1 ms-1" style="background-color: var(--vd-green-100); color: var(--vd-green-700);">🌿 Líder de ${escapeHtml(c.name)}</span>`).join("")}
     </div>
 
