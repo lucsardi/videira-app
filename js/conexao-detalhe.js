@@ -71,7 +71,7 @@ const idConexao = new URLSearchParams(window.location.search).get("id");
       ${listaLideres.length === 0
         ? `<p class="text-muted small mb-0">Nenhum líder definido ainda.</p>`
         : listaLideres.map((l) => `
-          <a href="detalhe.html?id=${l.people.id}" class="d-flex align-items-center gap-2 text-decoration-none mb-2" style="color: inherit;">
+          <a href="detalhe.html?id=${l.people.id}&voltar=${encodeURIComponent(`conexao-detalhe.html?id=${idConexao}`)}" class="d-flex align-items-center gap-2 text-decoration-none mb-2" style="color: inherit;">
             ${avatarHtml(l.people)}
             <span class="fw-semibold small">${escapeHtml(l.people.full_name)}</span>
           </a>
@@ -85,7 +85,7 @@ const idConexao = new URLSearchParams(window.location.search).get("id");
     ${lista.length === 0
       ? `<div class="card p-3 text-muted small">Ninguém cadastrado nessa conexão ainda.</div>`
       : lista.map((p) => `
-        <a href="detalhe.html?id=${p.id}" class="text-decoration-none" style="color: inherit;">
+        <a href="detalhe.html?id=${p.id}&voltar=${encodeURIComponent(`conexao-detalhe.html?id=${idConexao}`)}" class="text-decoration-none" style="color: inherit;">
           <div class="card card-pessoa p-3 mb-2 d-flex flex-row justify-content-between align-items-center">
             <div class="d-flex align-items-center gap-2" style="min-width: 0;">
               ${avatarHtml(p)}

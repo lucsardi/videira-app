@@ -104,6 +104,13 @@ function badgeLiderancaHtml(p, classeExtra = "ms-1") {
   return `<span class="badge badge-lider ${classeExtra}">${rotuloLideranca(p.leader_role)}</span>`;
 }
 
+// Lê o parâmetro "voltar" da URL atual — usado para lembrar de onde a pessoa
+// veio (ex: dentro de uma conexão específica) e devolvê-la pro lugar certo
+// depois de salvar/cancelar/excluir, em vez de sempre cair na lista geral.
+function paginaVoltar(padrao = "membros.html") {
+  return new URLSearchParams(window.location.search).get("voltar") || padrao;
+}
+
 // Quando alguém cadastra o aniversário de casamento e vincula o cônjuge a uma
 // pessoa que também está cadastrada no sistema (spouse_id), essa função "empresta"
 // os dados do casamento para o registro do cônjuge também — sem precisar

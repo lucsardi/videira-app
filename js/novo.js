@@ -17,6 +17,8 @@ let TODAS_PESSOAS_CONJUGE = []; // lista pra popular o select de cônjuge vincul
 
   const menu = await montarLayout("novo.html");
 
+  document.getElementById("linkCancelar").href = paginaVoltar();
+
   // Só quem pode editar acessa esta tela
   if (!menu?.podeEditar) {
     window.location.href = "membros.html";
@@ -342,7 +344,7 @@ async function salvarPessoa(e) {
   }
 
   if (idEdicao) {
-    window.location.href = "membros.html";
+    window.location.href = paginaVoltar();
     return;
   }
 

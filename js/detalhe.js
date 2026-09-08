@@ -10,6 +10,8 @@ const idDetalhe = new URLSearchParams(window.location.search).get("id");
 
   const menu = await montarLayout("detalhe.html");
 
+  document.getElementById("linkVoltar").href = paginaVoltar();
+
   if (!idDetalhe) {
     window.location.href = "membros.html";
     return;
@@ -90,7 +92,7 @@ const idDetalhe = new URLSearchParams(window.location.search).get("id");
 
     <div class="d-flex gap-2">
       <button class="btn btn-celebration flex-fill" id="btnCelebrar">🎉 Celebrar</button>
-      ${menu?.podeEditar ? `<a href="novo.html?id=${p.id}" class="btn btn-outline-primary flex-fill">Editar</a>` : ""}
+      ${menu?.podeEditar ? `<a href="novo.html?id=${p.id}&voltar=${encodeURIComponent(paginaVoltar())}" class="btn btn-outline-primary flex-fill">Editar</a>` : ""}
     </div>
     ${menu?.podeExcluir ? `<button class="btn btn-link text-danger w-100 mt-2" id="btnExcluir">Excluir cadastro</button>` : ""}
   `;
@@ -113,6 +115,6 @@ const idDetalhe = new URLSearchParams(window.location.search).get("id");
       mostrarToast("Não foi possível excluir: " + erroExcluir.message, "danger");
       return;
     }
-    window.location.href = "membros.html";
+    window.location.href = paginaVoltar();
   });
 })();
