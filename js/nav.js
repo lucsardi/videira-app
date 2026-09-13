@@ -20,6 +20,7 @@ async function montarLayout(paginaAtual) {
     itensBase.push({ href: "novo.html", label: "Novo cadastro", icone: "➕" });
   }
   itensBase.push({ href: "relatorios.html", label: "Relatórios", icone: "📄" });
+  itensBase.push({ href: "escala.html", label: "Escala", icone: "📋" });
 
   // Itens só de admin
   const itensAdmin = admin
@@ -72,6 +73,7 @@ async function montarLayout(paginaAtual) {
   const paginasMenu = [
     ...(editar ? [{ href: "novo.html", label: "Novo cadastro", icone: "➕" }] : []),
     { href: "relatorios.html", label: "Relatórios", icone: "📄" },
+    { href: "escala.html", label: "Escala", icone: "📋" },
     ...(admin ? [{ href: "usuarios.html", label: "Usuários", icone: "👥" }] : []),
     { href: "perfil.html", label: "Meu perfil", icone: "👤" },
   ];

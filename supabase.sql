@@ -44,6 +44,21 @@ alter table people add column if not exists spouse_id uuid references people(id)
 alter table people drop constraint if exists people_spouse_not_self;
 alter table people add constraint people_spouse_not_self check (spouse_id is null or spouse_id <> id);
 
+-- Tipo de liderança da pessoa (substitui o antigo checkbox simples "é líder/pastor"):
+--   leader        -> Líder de Conexão
+--   leader_pastor -> Líder de Conexão / Pastor
+--   pastor        -> Pastor (sem conexão específica vinculada)
+--   null          -> não é líder nem pastor
+alter table people add column if not exists leader_role text;
+alter table people drop constraint if exists people_leader_role_check;
+alter table people add constraint people_leader_role_check
+  check (leader_role is null or leader_role in ('leader', 'leader_pastor', 'pastor'));
+
+-- Migração de quem já estava marcado no checkbox antigo (is_leader = true):
+-- por padrão vira "Líder de Conexão/Pastor" — é só um chute razoável, ajuste
+-- manualmente quem for só Pastor ou só Líder editando o cadastro da pessoa.
+update people set leader_role = 'leader_pastor' where is_leader = true and leader_role is null;
+
 -- ---------- Tabela: connection_leaders (líderes de cada conexão) ----------
 -- Cada linha liga UMA pessoa (já cadastrada em "people") a UMA conexão como líder.
 -- Uma conexão pode ter até 4 líderes (checado pelo gatilho abaixo) — podem ser
@@ -352,6 +367,29 @@ create policy "avatars_update_autenticado" on storage.objects
 drop policy if exists "avatars_delete_autenticado" on storage.objects;
 create policy "avatars_delete_autenticado" on storage.objects
   for delete using (bucket_id = 'avatars' and auth.role() = 'authenticated');
+
+-- =========================================================
+-- Tabela: escala (quem é responsável por postar os aniversários)
+-- =========================================================
+create table if not exists escala (
+  id uuid primary key default gen_random_uuid(),
+  data date not null,
+  pessoa_id uuid not null references people(id) on delete cascade,
+  observacoes text,
+  created_by uuid references auth.users(id) on delete set null,
+  created_at timestamptz default now()
+);
+
+alter table escala enable row level security;
+
+-- Todo mundo logado pode ver a escala; só admin cria/edita/apaga
+drop policy if exists "escala_select" on escala;
+create policy "escala_select" on escala
+  for select using (auth.role() = 'authenticated');
+
+drop policy if exists "escala_admin_all" on escala;
+create policy "escala_admin_all" on escala
+  for all using (public.is_admin()) with check (public.is_admin());
 
 -- =========================================================
 -- Depois de rodar este script:
